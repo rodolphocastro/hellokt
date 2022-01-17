@@ -1,3 +1,7 @@
+/*
+    helloKt - A simple sandbox for playing around with Kotlin features
+    Copyright (C) 2022  Rodolpho Alves
+ */
 @file:Suppress("ClassName")
 
 import org.junit.Test

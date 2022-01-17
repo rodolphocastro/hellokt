@@ -1,3 +1,8 @@
+/*
+    helloKt - A simple sandbox for playing around with Kotlin features
+    Copyright (C) 2022  Rodolpho Alves
+ */
+
 fun main(args: Array<String>) {
     println("Hello World!")
 

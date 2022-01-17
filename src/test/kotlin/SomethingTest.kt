@@ -1,3 +1,8 @@
+/*
+    helloKt - A simple sandbox for playing around with Kotlin features
+    Copyright (C) 2022  Rodolpho Alves
+ */
+
 import org.junit.Test
 
 import org.junit.Assert.*
