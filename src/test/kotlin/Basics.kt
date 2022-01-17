@@ -3,6 +3,7 @@
 import org.junit.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
 
 class `Kotlin basics` {
 
@@ -56,5 +57,24 @@ class `Kotlin basics` {
         assertEquals(someString.uppercase(), secondResult)
         assertContains(thirdResult, someString, ignoreCase = true)
         assertEquals(thirdResult, fourthResult)
+    }
+
+    /**
+     * The basics for variables in Kotlin.
+     */
+    @Test
+    fun `Variables and assignment`() {
+        // Arrange
+        val `this is a constant` = "something that is immutable and has its type inferred"  // val is the keyword for constants
+        val `this is a typed constant`: () -> Unit = {} // you can help the compiler to infer a type by providing : Type
+        var `this is a variable` = `this is a constant` // var is the keyword for variables
+        `this is a variable` += `this is a variable`    // vars can be reassigned
+        //`this is a constant` = `this is a variable`     // vals cannot, uncommenting would break the compiler
+
+        // Act
+        `this is a typed constant`()    // Invoking a val that contains a lambda/anonymous function
+
+        // Assert
+        assertNotEquals(`this is a constant`, `this is a variable`)
     }
 }
