@@ -81,4 +81,29 @@ class `Kotlin basics` {
         // Assert
         assertNotEquals(`this is a constant`, `this is a variable`)
     }
+
+    /**
+     * Nullity is a lot different between Kotlin and most OO languages (Java, C#)
+     */
+    @Test
+    fun `Null safety`() {
+        // Arrange
+        var `no nulls ever allowed` = "This won't ever be null" // Unless we specify, the compiler always infer non-nullable types
+        //`no nulls ever allowed` = null        // Uncommenting this would break the compiler
+        var `nulls are allowed here`: String? = "This might be null"    // By specifying something as nullable (? operator), we can now assign nulls
+        `nulls are allowed here` = null     // It just works
+
+        fun act(aString: String): String {
+            return aString.uppercase()
+        }
+
+        // Act
+        val firstResult = act(`no nulls ever allowed`)
+        //val secondResult = act(`nulls are allowed here`)    // Uncomment for Compilation error
+        val secondResult = act(`nulls are allowed here` ?: "Oh no") // By using the null coalesce operator "?:" we can pass in a default value in case a variable might be null
+
+        // Assert
+        assertEquals(`no nulls ever allowed`.uppercase(), firstResult)
+        assertEquals("Oh no".uppercase(), secondResult)
+    }
 }
