@@ -5,6 +5,7 @@
 @file:Suppress("ClassName")
 
 import org.junit.Test
+import kotlin.math.exp
 import kotlin.test.assertEquals
 
 /**
@@ -45,4 +46,41 @@ class `Kotlin's Control Flow` {
         assertEquals(expected, statementGot)
         assertEquals(expected, expressionGot)
     }
+
+    /**
+     * Kotlin provides us with the usual loop states foreach, while and do...while.
+     */
+    @Test
+    fun `For, While and Do-While are the loops supported by Kotlin`() {
+        // Arrange
+        val subject = listOf("Abacaxi", "Banana", "Carambola")  // Creating an immutable list of Strings
+        val expected = subject.size
+        var (countFor, countWhile, countDoWhile) = listOf(0, 0, 0) // Creating and assigning multiple variables at once
+        val actWithFor = {
+            for (thing in subject) {
+                countFor++
+            }
+        }
+        val actWithWhile = {
+            while (countWhile < subject.size) {
+                countWhile++
+            }
+        }
+        val actWithDoWhile = {
+            do {
+                countDoWhile++
+            } while (countDoWhile < subject.size)
+        }
+
+        // Act
+        actWithFor()
+        actWithDoWhile()
+        actWithWhile()
+
+        // Assert
+        assertEquals(expected, countFor)
+        assertEquals(expected, countWhile)
+        assertEquals(expected, countDoWhile)
+    }
+    
 }
