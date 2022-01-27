@@ -82,5 +82,28 @@ class `Kotlin's Control Flow` {
         assertEquals(expected, countWhile)
         assertEquals(expected, countDoWhile)
     }
-    
+
+    /**
+     * Range operators allow us to easily create and traverse through ranges.
+     */
+    @Suppress("LocalVariableName")
+    @Test
+    fun `Ranges allow us to handle control flow and assert upon objects`() {
+        // Arrange
+        val `from one, up to ten` = (1..10).toList()            // Creating a list generated from a full range
+        val `odd numbers, up to ten` =
+            (1..10 step 2).toList()  // Creating a list generated from a range that grows by 2 each step
+        val `from ten, down to one` = (10 downTo 1).toList()    // Creating a list from a reverse range
+        val `from A to Z` =
+            ('A' until 'Z').toList()            // Creating a list of all characters in the alphabet, expect Z
+
+        // Act
+
+        // Assert
+        assert(`from A to Z`.contains('B'))    // Checking if B is within the a to Z range
+        assert(`odd numbers, up to ten`.contains(9))
+        assertEquals(10, `from ten, down to one`.first())
+        assertEquals(10, `from one, up to ten`.last())
+    }
+
 }
