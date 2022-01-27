@@ -11,3 +11,7 @@ Simply do a `gradlew test`, this is everything this project needs to be "execute
 The `main` subdirectory contains a dummy Console app that simply prints something.
 
 The `test` subdirectory contains all the tests that describe the steps taken on playing with this language and its libraries.
+
+## Resources
+
+Most of the tests in this project were based on the [Kotlin by Example](https://play.kotlinlang.org/byExample) website.
