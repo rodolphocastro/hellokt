@@ -5,6 +5,7 @@
 @file:Suppress("ClassName")
 
 import org.junit.Test
+import kotlin.math.exp
 import kotlin.test.*
 
 /**
@@ -30,14 +31,14 @@ class BrazilianTelephone(number: String) : Telephone(55, number)
  * The compiler will work its magic to automatically give us the toString, equals and hashCode methods.
  * Additionally, a copy method and "componentN" methods are also provided, to help you handle the data within such objects.
  */
-data class Contact(val name: String, val age: Int) {
+data class Contact(val name: String, val age: Int)
 
-}
+private const val s = "1234-4321"
 
 class `Kotlin classes` {
 
     @Test
-    fun `A class with a primary constructor and properties`() {
+    fun `a class with a primary constructor and properties`() {
         // Arrange
         val expectedDigit = 41
         val expectedNumber = "9 9877-2345"
@@ -56,7 +57,7 @@ class `Kotlin classes` {
     }
 
     @Test
-    fun `A class init method can contain validation logic`() {
+    fun `a class init method can contain validation logic`() {
         // Arrange
         var subject: Telephone? = null
         val act = {
@@ -76,7 +77,7 @@ class `Kotlin classes` {
     }
 
     @Test
-    fun `A data class is a special class with some methods scaffolded by the compiler, usually they're done for immutability`() {
+    fun `a data class is a special class with some methods scaffolded by the compiler, usually they're done for immutability`() {
         // Arrange
         val subject = Contact("Alves, Rodolpho", 29)
         val (expectedName, unexpectedAge) = subject // Using destructuring to fetch values from a data class
@@ -92,7 +93,7 @@ class `Kotlin classes` {
     }
 
     @Test
-    fun `An open class or method allows others to inherit it and modify behavior`() {
+    fun `an open class or method allows others to inherit it and modify behavior`() {
         // Arrange
         val expectedPhone = "9 9999-9999"
         val subject = BrazilianTelephone(expectedPhone)
@@ -113,5 +114,41 @@ class `Kotlin classes` {
         assertEquals(expectedPhone, subject.number)
         assertEquals(55, subject.longDistanceDigit)
         assertNull(otherSubject)
+    }
+
+    @Test
+    fun `classes can also contain generic parameters`() {
+        // Arrange
+        /**
+         * In Kotlin we can have generic arguments for classes' members and functions.
+         * In order for that to work, in a class level, you need to declare the generic constraint at the class' declaration
+         * Afterwards, for methods, you'll need to declare it before the method if it's different than the class' level
+         * generic constraint.
+         */
+        class MagicTelephone<E>(longDistanceDigit: Int, number: String, val genericThing: E) : Telephone(longDistanceDigit, number) {
+            fun getThing(): E {
+                return genericThing
+            }
+
+            fun <T> getSomethingElse() : T {
+                return genericThing as T
+            }
+
+            override fun toString(): String {
+                return number
+            }
+        }
+        val expected = null
+        val number = "1234-4321"
+        val subject = MagicTelephone(55, number, expected)
+        val secondSubject = MagicTelephone(55, number, subject)
+
+        // Act
+        val got = subject.getThing()
+        val gotAgain = secondSubject.getSomethingElse<Telephone>().number
+
+        // Assert
+        assertEquals(expected, got)
+        assertEquals(number, gotAgain)
     }
 }
