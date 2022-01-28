@@ -33,8 +33,6 @@ class BrazilianTelephone(number: String) : Telephone(55, number)
  */
 data class Contact(val name: String, val age: Int)
 
-private const val s = "1234-4321"
-
 class `Kotlin classes` {
 
     @Test
@@ -125,12 +123,13 @@ class `Kotlin classes` {
          * Afterwards, for methods, you'll need to declare it before the method if it's different than the class' level
          * generic constraint.
          */
-        class MagicTelephone<E>(longDistanceDigit: Int, number: String, val genericThing: E) : Telephone(longDistanceDigit, number) {
+        class MagicTelephone<E>(longDistanceDigit: Int, number: String, val genericThing: E) :
+            Telephone(longDistanceDigit, number) {
             fun getThing(): E {
                 return genericThing
             }
 
-            fun <T> getSomethingElse() : T {
+            fun <T> getSomethingElse(): T {
                 return genericThing as T
             }
 
@@ -138,6 +137,7 @@ class `Kotlin classes` {
                 return number
             }
         }
+
         val expected = null
         val number = "1234-4321"
         val subject = MagicTelephone(55, number, expected)
@@ -150,5 +150,36 @@ class `Kotlin classes` {
         // Assert
         assertEquals(expected, got)
         assertEquals(number, gotAgain)
+    }
+
+    /**
+     * Enum classes are "enums on steroids" - basically they can do everything an Enum does but can also be extended
+     * with methods.
+     */
+    enum class ParanaCities(val longName: String) {
+        CWB("Curitiba"),
+        LDN("Londrina"),
+        PG("Ponta Grossa");
+
+        /**
+         * Returns if the current city is the capital of Paraná.
+         */
+        fun isCapitalCity(): Boolean {
+            return this == ParanaCities.CWB
+        }
+
+    }
+
+    @Test
+    fun `Enum classes are used to represent a finite set of values and allow us to expand it with custom logic`() {
+        // Arrange
+        val expected = true
+        val subject = ParanaCities.CWB
+
+        // Act
+        val got = subject.isCapitalCity()
+
+        // Assert
+        assertEquals(expected, got)
     }
 }
