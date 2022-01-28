@@ -106,4 +106,28 @@ class `Kotlin's Control Flow` {
         assertEquals(10, `from one, up to ten`.last())
     }
 
+    /**
+     * Kotlin doesn't have ternary operators and has two types of equality: Referential and Structural.
+     * https://play.kotlinlang.org/byExample/02_control_flow/04_Equality%20Checks
+     */
+    @Test
+    fun `Equality and Ternaries`() {
+        // Arrange
+        data class Food(val name: String)
+        val foodName = "Bolinho de Arroz"
+        val expected = Food(foodName)
+
+        // Act
+        val got = expected
+        val otherGot = Food(foodName)
+
+        // Assert
+        assert(expected === got)    // Equality by reference (is the same object)
+        assert(expected == got)     // Equality by structure (has the same structural values)
+        assert(expected !== otherGot)   // They are not (referentially) equal because they are different variables
+        assert(expected == otherGot)    // They are equal because they contain the same string
+        @Suppress("RedundantIf")
+        assert(if (got == null) false else true)    // Kotlin ternary equivalent
+    }
+
 }
