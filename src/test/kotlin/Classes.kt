@@ -5,7 +5,6 @@
 @file:Suppress("ClassName")
 
 import org.junit.Test
-import kotlin.math.exp
 import kotlin.test.*
 
 /**
@@ -17,6 +16,16 @@ open class Telephone(val longDistanceDigit: Int, val number: String) {
     init {
         if (longDistanceDigit <= 0) throw Exception("the digit should never be zero or less")
         if (number.isEmpty()) throw Exception("a telephone number should never be empty")
+    }
+
+    /**
+     * A companion object is Kotlin's way of creating static methods and properties.
+     * There is no "static" keyword in Kotlin.
+     */
+    companion object TelephoneFactory {
+        fun createMockedTelephone(longDistanceDigit: Int): Telephone {
+            return Telephone(longDistanceDigit, "0000-0000")
+        }
     }
 }
 
@@ -157,9 +166,7 @@ class `Kotlin classes` {
      * with methods.
      */
     enum class ParanaCities(val longName: String) {
-        CWB("Curitiba"),
-        LDN("Londrina"),
-        PG("Ponta Grossa");
+        CWB("Curitiba"), LDN("Londrina"), PG("Ponta Grossa");
 
         /**
          * Returns if the current city is the capital of Paraná.
@@ -181,5 +188,74 @@ class `Kotlin classes` {
 
         // Assert
         assertEquals(expected, got)
+    }
+
+    /**
+     * Creating a "single" object/properties structure and assigning it to a variable.
+     * This is basically a compiler-enforced lazy singleton - it'll only be created if it's used at least once and
+     * will always be the same instance, no matter what.
+     */
+    private val aRapper = object {
+        val name = "Slim Shady"
+        val weight = object {
+            val unitOfMeasure = "Kilograms"
+            var value = 45f
+        }
+
+        /**
+         * Gain some weight.
+         */
+        fun eat() {
+            weight.value += 1
+        }
+    }
+
+    /**
+     * Creating a "single" object/properties structure without assigning it to a variable.
+     * This is basically a compiler-enforced lazy singleton - it'll only be created if it's used at least once and
+     * will always be the same instance, no matter what.
+     */
+    object DoSomething {
+        var aProperty: String = ""
+
+        fun what(): String {
+            return aProperty.uppercase()
+        }
+    }
+
+    @Test
+    fun `Besides being instances of a class, Kotlin objects can also be used as an expression`(): Unit {
+        // Arrange
+        val expectedProperty = "oh no"
+        val expectedWeight = 47f
+        val act: () -> Float = {
+            aRapper.eat()
+            aRapper.weight.value
+        }
+        DoSomething.aProperty = expectedProperty
+        // Act
+        /**
+         * Acting twice to "prove" the singleton works as expected.
+         */
+        act()
+        val got = act()
+
+        /**
+         * Also acting and changing properties on the other object/singleton.
+         */
+        val gotFirstTime = DoSomething.what()
+        DoSomething.aProperty = "no oh"
+
+        /**
+         * Consuming a companion's object method to create a new Instance
+         * companion's object are the way of Kotlin to handle static instances
+         */
+        val secondGot = Telephone.createMockedTelephone(55)
+
+        // Assert
+        assertEquals(expectedWeight, got)
+        assertEquals(expectedProperty.uppercase(), gotFirstTime)
+        assertNotEquals(expectedProperty, DoSomething.aProperty)
+        assertNotNull(secondGot)
     }
 }
