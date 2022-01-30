@@ -57,4 +57,41 @@ class `Collections in Kotlin` {
         assert(`an immutable view of a mutable list`.contains(additionalUser))  // and its read-only view!
         assert(!`an immutable list of users`.contains(additionalUser))          // But *never* to the read-only list!
     }
+
+    /**
+     * Set<T> and MutableSet<T>.
+     */
+    @Suppress("LocalVariableName")
+    @Test
+    fun `Sets are unordered collections of items, they cannot have duplicates and can be mutable or not`(): Unit {
+        // Arrange
+        // An Admin that will be used on our test
+        val adminUser = User(
+            "ralves", UserPermission.Administrator
+        )
+        // A user that will be used on our test
+        val additionalUser = User("john-doe-2k22")
+
+        val `a mutable set of users` = mutableSetOf<User>(
+            adminUser, User("rodolpho.alves"), User("evil-doer-666", UserPermission.Banned)
+        )   // Creating a mutable list of users (aka: a list we can add or remove elements from
+        val `an immutable set of users` = setOf<User>(
+            adminUser
+        )   // Creating an immutable list of users (aka: a list we cannot add elements into or remove from)
+        val `an immutable view of a mutable set`: Set<User> =
+            `a mutable set of users`   // Creating a "read only" view of an existing mutable list
+
+        // Act
+        val firstGot =
+            `a mutable set of users`.add(additionalUser)    // This addition into the existing Set will return true (because something was actually added!)
+        val secondGot =
+            `a mutable set of users`.add(additionalUser)    // This second addition will return false (because nothing was added since it was a duplicate)
+        //`an immutable set of users`.add(additionalUser)   // Doesn't compile! Immutable sets can't be added onto
+        //`an immutable view of a mutable set`             // Also doesn't compile! We cannot mutate a read-only view.
+
+        // Assert
+        assert(`a mutable set of users`.contains(additionalUser))              // The user must've been added to the set!
+        assert(`an immutable view of a mutable set`.contains(additionalUser))  // and its read-only view!
+        assert(!`an immutable set of users`.contains(additionalUser))          // But *never* to the read-only set!
+    }
 }
