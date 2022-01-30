@@ -5,7 +5,7 @@
 @file:Suppress("ClassName")
 
 import org.junit.Test
-import kotlin.math.exp
+import kotlin.math.pow
 import kotlin.test.assertEquals
 
 /**
@@ -114,5 +114,38 @@ class `Functional Features in Kotlin` {
         assertEquals(expected, secondGot)
         assertEquals(expected, thirdGot)
         assertEquals(expected, fourthGot)
+    }
+
+    /**
+     * An extension property for an Int.
+     */
+    private val Int.doubled: Int
+        get() = this * 2
+
+    /**
+     * An extension method for an Int
+     */
+    private fun Int.toThePowerOf(by: Int): Int = (this.toDouble()).pow(by).toInt()
+
+    @Test
+    fun `Extension functions and properties can be used to extend functionality on existing classes`(): Unit {
+        // Arrange
+        val expected = 4
+
+        /**
+         * A local extension method.
+         * Notice how we're stating <someClass>.<nameOfTheFunction>
+         */
+        fun Int.multiplyBy(qty: Int) = this * qty
+
+        // Act
+        val got = 2.multiplyBy(2)              // Using a local extension method
+        val secondGot = 2.toThePowerOf(2)       // Using a private extension method
+        val thirdGot = 2.doubled                     // Using a private property extension
+
+        // Assert
+        assertEquals(expected, got)
+        assertEquals(expected, secondGot)
+        assertEquals(expected, thirdGot)
     }
 }
