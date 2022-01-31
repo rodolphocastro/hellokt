@@ -6,6 +6,7 @@
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
 
 /**
  * Tests featuring Kotlin Collections!
@@ -182,5 +183,33 @@ class `Collections in Kotlin` {
             assert(user.permission == UserPermission.Administrator)     // There should only be admins in this list
         }
         // Don't worry... there's a better way to query. We'll get there 🙂
+    }
+
+    /**
+     * The "map" function is the equivalent of the LINQ "Select" function to C# nerds.
+     * It allows us to apply a function to every element within a collection and return a brand new copy of the previous
+     * collection with the applied mutations.
+     */
+    @Test
+    fun `the map function allows us to run a function on every element of a collection`(): Unit {
+        // Arrange
+        val listOfUsers = createListOfUsers(1000)
+        val bannedUsers = listOfUsers.filter { it.permission == UserPermission.Banned }
+
+        // Act
+        val gotBanAllUsers =
+            listOfUsers.map { u -> u.copy(permission = UserPermission.Banned) } // Banning ALL users with a "verbose" lambda
+        val gotUnbannedUsers =
+            bannedUsers.map { it.copy(permission = UserPermission.User) } // Unbanning all the banned users with the implicit it operator
+
+        // Assert
+        assertNotEquals(listOfUsers, gotBanAllUsers)
+        for (user in gotBanAllUsers) {
+            assert(user.permission == UserPermission.Banned)
+        }
+        assertNotEquals(bannedUsers, gotUnbannedUsers)
+        for (user in gotUnbannedUsers) {
+            assert(user.permission != UserPermission.Banned)
+        }
     }
 }
