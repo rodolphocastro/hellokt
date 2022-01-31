@@ -212,4 +212,29 @@ class `Collections in Kotlin` {
             assert(user.permission != UserPermission.Banned)
         }
     }
+
+    /**
+     * Any, All and None are existential queries in function format.
+     * They allow us to quickly execute a predicate on an entire collection and get its result.
+     */
+    @Test
+    @Suppress("LocalVariableName")
+    fun `there are three existential queries we can run on collections - any, all and none`(): Unit {
+        // Arrange
+        val listOfUsers = createListOfUsers(1000)
+        val bannedUsers = listOfUsers.filter { it.permission == UserPermission.Banned }
+        val nonBannedUsers = listOfUsers.filter { it.permission != UserPermission.Banned }
+
+        // Act
+        val `are there any Admins among all users?` = listOfUsers.any { it.permission == UserPermission.Administrator }
+        val `are all banned users really banned?` = bannedUsers.all { it.permission == UserPermission.Banned }
+        val `are there no banned users among active users` =
+            nonBannedUsers.none() { it.permission == UserPermission.Banned }
+
+
+        // Assert
+        assert(`are there any Admins among all users?`)
+        assert(`are all banned users really banned?`)
+        assert(`are there no banned users among active users`)
+    }
 }
