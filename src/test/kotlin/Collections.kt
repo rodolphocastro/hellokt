@@ -5,6 +5,7 @@
 @file:Suppress("ClassName")
 
 import kotlin.test.Test
+import kotlin.test.assertEquals
 
 /**
  * Tests featuring Kotlin Collections!
@@ -90,8 +91,49 @@ class `Collections in Kotlin` {
         //`an immutable view of a mutable set`             // Also doesn't compile! We cannot mutate a read-only view.
 
         // Assert
-        assert(`a mutable set of users`.contains(additionalUser))              // The user must've been added to the set!
-        assert(`an immutable view of a mutable set`.contains(additionalUser))  // and its read-only view!
-        assert(!`an immutable set of users`.contains(additionalUser))          // But *never* to the read-only set!
+        assert(`a mutable set of users`.contains(additionalUser))               // The user must've been added to the set!
+        assert(`an immutable view of a mutable set`.contains(additionalUser))   // and its read-only view!
+        assert(!`an immutable set of users`.contains(additionalUser))           // But *never* to the read-only set!
+        assert(firstGot)                                                        // Should be true because a value was added
+        assert(!secondGot)                                                      // Should be false because nothing was added
+    }
+
+    /**
+     * Map<T> and MutableMap<T>.
+     */
+    @Suppress("LocalVariableName")
+    @Test
+    fun `Maps are key-value oriented collections, they cannot have duplicate keys and can be mutable or not`(): Unit {
+        // Arrange
+        val baseScore = 0
+        val expectedScore = 2
+
+        // An Admin that will be used on our test
+        val adminUser = User(
+            "ralves", UserPermission.Administrator
+        )
+        // A user that will be used on our test
+        val additionalUser = User("john-doe-2k22")
+
+        val `a mutable map of users and scores` = mutableMapOf<User, Int>(adminUser to baseScore)
+        val `an immutable map of users and scores` = mapOf<User, Int>(adminUser to baseScore)
+        val `a read-only view of a mutable map`: Map<User, Int> = `a mutable map of users and scores`
+
+        // Act
+        `a mutable map of users and scores`[additionalUser] = 1 // Adding a new key:value into the map
+        `a mutable map of users and scores`[adminUser] =
+            `a mutable map of users and scores`.getValue(adminUser) + 2    // Incrementing the admin score to 2
+        //`an immutable map of users and scores`[adminUser] =
+        //    `a mutable map of users and scores`.getValue(adminUser) + 2 // Doesn't compile! Values are also immutable in a Map<T, A>
+        //`an immutable map of users and scores`[additionalUser] = 1    // Doesn't compile! We cannot add into an immutable set
+        //`a read-only view of a mutable map`[additionalUser] = 1
+
+        // Assert
+        assertEquals(
+            expectedScore, `a mutable map of users and scores`[adminUser]
+        )                                                                               // The admin's score must've been updated
+        assert(`a mutable map of users and scores`.containsKey(additionalUser))         // An JohnDoe must've been added
+        assert(!`an immutable map of users and scores`.containsKey(additionalUser))     // It must've not been added to the immutable map
+        assert(`a read-only view of a mutable map`.containsKey(additionalUser))         // But should be available in the read-only view!
     }
 }
