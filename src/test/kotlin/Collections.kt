@@ -29,7 +29,7 @@ class `Collections in Kotlin` {
      */
     @Suppress("LocalVariableName")
     @Test
-    fun `Lists are ordered collections of items, they can be mutable or not`(): Unit {
+    fun `lists are ordered collections of items, they can be mutable or not`(): Unit {
         // Arrange
         // An Admin that will be used on our test
         val adminUser = User(
@@ -64,7 +64,7 @@ class `Collections in Kotlin` {
      */
     @Suppress("LocalVariableName")
     @Test
-    fun `Sets are unordered collections of items, they cannot have duplicates and can be mutable or not`(): Unit {
+    fun `sets are unordered collections of items, they cannot have duplicates and can be mutable or not`(): Unit {
         // Arrange
         // An Admin that will be used on our test
         val adminUser = User(
@@ -103,7 +103,7 @@ class `Collections in Kotlin` {
      */
     @Suppress("LocalVariableName")
     @Test
-    fun `Maps are key-value oriented collections, they cannot have duplicate keys and can be mutable or not`(): Unit {
+    fun `maps are key-value oriented collections, they cannot have duplicate keys and can be mutable or not`(): Unit {
         // Arrange
         val baseScore = 0
         val expectedScore = 2
@@ -135,5 +135,52 @@ class `Collections in Kotlin` {
         assert(`a mutable map of users and scores`.containsKey(additionalUser))         // An JohnDoe must've been added
         assert(!`an immutable map of users and scores`.containsKey(additionalUser))     // It must've not been added to the immutable map
         assert(`a read-only view of a mutable map`.containsKey(additionalUser))         // But should be available in the read-only view!
+    }
+
+    /**
+     * Creates a not-so-random list of Users.
+     */
+    private fun createListOfUsers(qty: Int): List<User> {
+        val result = mutableListOf<User>()
+        val baseUser = User("user-", UserPermission.User)
+        val baseAdmin = User("admin-", UserPermission.Administrator)
+        for (idx in 1..qty) {
+            // Odds of being banned is 1 in 7
+            val isBanned = (idx % 7 == 0)
+            // Odds of being an Admin is 1 in 3
+            val userOrAdmin = if (idx % 3 == 0) baseAdmin else baseUser
+            // Creating our final subject based on the previous outcomes
+            val finalUser = baseUser.copy(
+                username = "${userOrAdmin.username}${idx}",
+                permission = if (isBanned) UserPermission.Banned else userOrAdmin.permission
+            )
+            result.add(finalUser)
+        }
+        return result
+    }
+
+    /**
+     * The "filter" function is the equivalent of the LINQ "where" function for C# nerds.
+     * It allows us to apply a predicate to a collection and retrieve just the elements which the predicate returns true.
+     */
+    @Test
+    fun `the filter function allows us to filter elements within a collection based on a predicate`(): Unit {
+        // Arrange
+        val listOfUsers = createListOfUsers(100)
+
+        // Act
+        val gotBanned =
+            listOfUsers.filter { x -> x.permission == UserPermission.Banned }       // Using a complete lambda as a predicate
+        val gotAdmins =
+            listOfUsers.filter { it.permission == UserPermission.Administrator }    // Using the implicit "it" notation as a predicate
+
+        // Assert
+        for (user in gotBanned) {
+            assert(user.permission == UserPermission.Banned)            // There should only be banned users in this list
+        }
+        for (user in gotAdmins) {
+            assert(user.permission == UserPermission.Administrator)     // There should only be admins in this list
+        }
+        // Don't worry... there's a better way to query. We'll get there 🙂
     }
 }
