@@ -75,4 +75,17 @@ class `Scopes in Kotlin` {
             assert(if (shouldExist) this != null else this == null)
         }
     }
+
+    @Test
+    fun `apply allows us to execute a block of code on an object, thus scoping to 'this' and returns the object itself with any modifications`(): Unit {
+        // Arrange
+        val subject = User("ralves")
+
+        // Act
+        //val got = subject?.apply { this.username = username.uppercase() }   // Won't compile, cannot reassign to val
+        val got = subject?.apply { isBanned = true }?.isBanned
+
+        // Assert
+        assertNotEquals(false, got)
+    }
 }
