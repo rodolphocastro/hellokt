@@ -7,6 +7,7 @@
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
+import kotlin.test.assertNull
 
 /**
  * Tests featuring Kotlin Collections!
@@ -236,5 +237,25 @@ class `Collections in Kotlin` {
         assert(`are there any Admins among all users?`)
         assert(`are all banned users really banned?`)
         assert(`are there no banned users among active users`)
+    }
+
+    @Test
+    @Suppress("LocalVariableName")
+    fun `find and findLast can be used to fetch the first, last or null item in the collection that matches a given predicate`(): Unit {
+        // Arrange
+        val listOfUsers = createListOfUsers(1000)
+
+        // Act
+        val `first found Admin` =
+            listOfUsers.find { it.permission == UserPermission.Administrator }              // Finding the first Admin in the collection
+        val `last found Admin` =
+            listOfUsers.findLast { it.permission == UserPermission.Administrator }          // Finding the last Admin in the collection
+        val `an user named Alligator` =
+            listOfUsers.find { it.username.equals("Alligator", true) }    // Finding a user named Alligator
+
+        // Assert
+        assert(`first found Admin`?.permission == UserPermission.Administrator) // The first result should really be an Admin
+        assert(`last found Admin`?.permission == UserPermission.Administrator)  // And so should the last one
+        assertNull(`an user named Alligator`)                                   // Since we never have an Alligator, this should be null!
     }
 }
