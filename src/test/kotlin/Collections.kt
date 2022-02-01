@@ -287,4 +287,22 @@ class `Collections in Kotlin` {
         assert(`last found Admin`.permission == UserPermission.Administrator)  // And so should the last one
         assertNull(`an user named Alligator`)                                   // Since we never have an Alligator, this should be null!
     }
+
+
+    @Test
+    fun `count allows us to quickly realize how many items within a collection match a specific predicate`() {
+        // Arrange
+        val expected = 1000
+        val listOfUsers = createListOfUsers(expected)
+
+        // Act
+        val got =
+            listOfUsers.count()                                                         // Count of all the elements in the collection
+        val gotAdmins =
+            listOfUsers.count { it.permission == UserPermission.Administrator }         // Count of all the Admins in the collection
+
+        // Assert
+        assertEquals(expected, got)
+        assert(gotAdmins < got)
+    }
 }
