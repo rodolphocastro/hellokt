@@ -57,4 +57,22 @@ class `Scopes in Kotlin` {
 
         assertNull(got)
     }
+
+    @Test
+    fun `with is a non-extension that allows us to access members of its arguments as if we were 'this'`(): Unit {
+        // Arrange
+        val shouldExist = Random.nextBoolean()
+        val subject: User? = if (shouldExist) User("ralves") else null
+
+        // Act
+        val got = subject?.run {
+            // if subject isn't null we get access to "this"
+            copy(isBanned = true)    // returns a banned copy of the user
+        }
+
+        // Assert
+        with(got) {
+            assert(if (shouldExist) this != null else this == null)
+        }
+    }
 }
