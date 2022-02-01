@@ -4,10 +4,7 @@
  */
 @file:Suppress("ClassName")
 
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNotEquals
-import kotlin.test.assertNull
+import kotlin.test.*
 
 /**
  * Tests featuring Kotlin Collections!
@@ -256,6 +253,38 @@ class `Collections in Kotlin` {
         // Assert
         assert(`first found Admin`?.permission == UserPermission.Administrator) // The first result should really be an Admin
         assert(`last found Admin`?.permission == UserPermission.Administrator)  // And so should the last one
+        assertNull(`an user named Alligator`)                                   // Since we never have an Alligator, this should be null!
+    }
+
+    /**
+     * The first and last functions allow us to find the first/last element in a collection that matches a given predicate.
+     * They both throw an Exception if nothing is found.
+     * The firstOrNull and lastOrNull return Null instead of Throwing in case nothing is found.
+     */
+    @Test
+    @Suppress("LocalVariableName")
+    fun `first, last, firstOrNull, lastOrNull can be used to fetch the first and last items in the collection that matches a given predicate`() {
+        // Arrange
+        val listOfUsers = createListOfUsers(1000)
+
+        // Act
+        val `first found Admin` =
+            listOfUsers.first { it.permission == UserPermission.Administrator }              // Finding the first Admin in the collection
+        val `last found Admin` =
+            listOfUsers.last { it.permission == UserPermission.Administrator }          // Finding the last Admin in the collection
+        val `first throws if nothing is found` = {
+            val result = listOfUsers.first { it.username.equals("Alligator", true) }
+        }
+        val `last throws if nothing is found` = {
+            val result = listOfUsers.last { it.username.equals("Alligator", true) }
+        }
+        val `an user named Alligator` = listOfUsers.lastOrNull() { it.username.equals("Alligator", true) }
+
+        // Assert
+        assertFailsWith(NoSuchElementException::class, `first throws if nothing is found`)
+        assertFailsWith(NoSuchElementException::class, `last throws if nothing is found`)
+        assert(`first found Admin`.permission == UserPermission.Administrator) // The first result should really be an Admin
+        assert(`last found Admin`.permission == UserPermission.Administrator)  // And so should the last one
         assertNull(`an user named Alligator`)                                   // Since we never have an Alligator, this should be null!
     }
 }
