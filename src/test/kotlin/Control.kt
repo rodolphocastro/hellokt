@@ -57,7 +57,7 @@ class `Kotlin's Control Flow` {
         val expected = subject.size
         var (countFor, countWhile, countDoWhile) = listOf(0, 0, 0) // Creating and assigning multiple variables at once
         val actWithFor = {
-            for (thing in subject) {
+            for (thing in subject) {        // use .withIndex to fetch the index and the value
                 countFor++
             }
         }

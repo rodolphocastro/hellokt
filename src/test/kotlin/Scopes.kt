@@ -88,4 +88,16 @@ class `Scopes in Kotlin` {
         // Assert
         assertNotEquals(false, got)
     }
+
+    @Test
+    fun `also allows us to "append" a block of code after something is executed, scoping the previous object to "it" within its scope`(): Unit {
+        // Arrange
+        var shadowCopy: User?
+
+        // Act
+        val subject = User("ralves").also { shadowCopy = it.copy(isBanned = true) }
+
+        // Assert
+        assertNotEquals(subject, shadowCopy)
+    }
 }
