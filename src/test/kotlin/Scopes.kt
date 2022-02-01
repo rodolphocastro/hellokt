@@ -36,4 +36,25 @@ class `Scopes in Kotlin` {
 
         assertNull(got)
     }
+
+    @Test
+    fun `run allows us to scope logic and run null-checks on objects, it returns the last expression on its block as a result`(): Unit {
+        // Arrange
+        val shouldExist = Random.nextBoolean()
+        val subject: User? = if (shouldExist) User("ralves") else null
+
+        // Act
+        val got = subject?.run {
+            // if subject isn't null we get access to "this"
+            copy(isBanned = true)    // returns a banned copy of the user
+        }
+
+        // Assert
+        if (shouldExist) {
+            assert(got?.isBanned ?: false)
+            return
+        }
+
+        assertNull(got)
+    }
 }
