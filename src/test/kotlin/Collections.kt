@@ -305,4 +305,31 @@ class `Collections in Kotlin` {
         assertEquals(expected, got)
         assert(gotAdmins < got)
     }
+
+    /**
+     * AssociateBy and GroupBy allow us to quickly create maps from an existing collection, based on which properties
+     * we'd like to key by.
+     * AssociateBy grabs the first found value only, creating a map of a 0:1 value per key.
+     * GroupBy grabs all found values, creating a map of 0:N values per key.
+     */
+    @Test
+    @Suppress("LocalVariableName")
+    fun `associateBy and groupBy allows us to build maps from a collection, indexing elements by a given key`() {
+        // Arrange
+        val users = createListOfUsers(1000)
+
+        // Act
+        val userPerRole =
+            users.associateBy { it.permission }  // Since we aren't specifying which values we want we'll get the whole object as a result
+        val namePerRole = users.associateBy(
+            User::permission, User::username
+        ) // Now we're specifying that we want to associate Permissions to Names
+        val usersPerRole = users.groupBy({ it.permission.accessCode },
+            { it.username.uppercase() }) // Grouping by access-code and uppercase of the name
+
+        // Assert
+        assert(userPerRole.keys.count() <= 3)       // Since there are only 3 roles when associating we should never have more than 3
+        assert(namePerRole.values.count() <= 3)     // Since associate only grabs a single value we should never have more than 3
+        assert(usersPerRole.all { it.value.count() > 1 })   // GroupBy ensures we read multiple values, thus every key should have more than a single value
+    }
 }
