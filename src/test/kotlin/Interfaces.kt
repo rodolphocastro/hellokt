@@ -82,4 +82,32 @@ class `Kotlin Interfaces` {
         // Assert
         assertEquals(subject, got)
     }
+
+    /**
+     * A functional interface contains the "fun" keyword and must have one, and only one, abstract method.
+     * They are useful to help reduce verbosity when declaring lambda expressions.
+     */
+    fun interface Scream {
+        fun doIt(curseWord: String): String
+    }
+
+    @Test
+    fun `A functional (or SAM, Single Abstract Method) interface helps us reduce lambda verbosity`(): Unit {
+        // Arrange
+        val expected = "I hAvE nO MoUtH"
+
+        /**
+         * In order to "implement" this interface we just need to declare a lambda that uses that
+         * invokes the interface's abstract method.
+         */
+        val screamAllCaps = Scream {
+            it.uppercase()
+        }
+
+        // Act
+        val got = screamAllCaps.doIt(expected)
+
+        // Assert
+        assertEquals(expected.uppercase(), got)
+    }
 }
