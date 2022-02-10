@@ -1,5 +1,5 @@
 plugins {
-    id 'org.jetbrains.kotlin.jvm' version '1.6.20'
+    id 'org.jetbrains.kotlin.jvm' version '1.6.10'
     id 'application'
 }
 
@@ -12,6 +12,7 @@ repositories {
 
 dependencies {
     implementation 'junit:junit:4.13.2'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0'
     testImplementation 'org.jetbrains.kotlin:kotlin-test'
 }
 
