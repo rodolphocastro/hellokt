@@ -2,11 +2,9 @@
     helloKt - A simple sandbox for playing around with Kotlin features
     Copyright (C) 2022  Rodolpho Alves
  */
-@file:Suppress("ClassName")
-@file:OptIn(ExperimentalTime::class)
+@file:Suppress("ClassName") @file:OptIn(ExperimentalTime::class)
 
 import kotlinx.coroutines.*
-import kotlin.math.exp
 import kotlin.test.*
 import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
@@ -47,7 +45,7 @@ class `Asynchronous programming in Kotlin` {
         delay(delayBy)
         return source.uppercase()
     }
-    
+
     @Test
     fun `In order to consume 'suspend' functions you need to create a scope, be it a blocking or a suspending one`(): Unit {
         // Arrange
@@ -71,24 +69,27 @@ class `Asynchronous programming in Kotlin` {
      * One can then "join" the job to await its completion.
      */
     @Test
-    fun `One can spin-off new coroutines (and track their progress) by using the launch function when no return is expected`() = runBlocking {
-        // Arrange
-        var result = 1
-        val expected = 2
+    fun `One can spin-off new coroutines (and track their progress) by using the launch function when no return is expected`() =
+        runBlocking {
+            // Arrange
+            var result = 1
+            val expected = 2
 
-        // Act
-        val incrementByOne = launch {
-            delay(1000)
-            result++
+            // Act
+            val incrementByOne = launch {
+                delay(1000) // Wait a bit, just for the lulz
+                result++    // Increment the result variable
+            }
+
+            // Assert
+            assertNotEquals(
+                expected, result
+            )   // Since incrementByOne waits for 1s we don't expect result to have been incremented yet
+            assertFalse(incrementByOne.isCompleted) // Neither should it be complete
+            incrementByOne.join()   // Now we're telling this scope "yo, wait for that job to complete"
+            assertEquals(expected, result)  // Finally - result should be expected
+            assertTrue(incrementByOne.isCompleted)  // And the job should read "completed"
         }
-
-        // Assert
-        assertNotEquals(expected, result)
-        assertFalse(incrementByOne.isCompleted)
-        incrementByOne.join()
-        assertEquals(expected, result)
-        assertTrue(incrementByOne.isCompleted)
-    }
 
     /**
      * Similar to C#'s "Task" we can spin off Jobs from within a CoroutineScope by using the async{} block.
@@ -103,10 +104,85 @@ class `Asynchronous programming in Kotlin` {
         }
 
         // Act
+        assertFalse(deferredRoutine.isCompleted)    // Since we didn't await or anything, it should not be completed yet
         val result = deferredRoutine.await()
 
         // Assert
-        assertEquals(expected, result)
+        assertEquals(expected, result)  // After awaiting and returning - things should just work (TM)
+    }
+
+    /**
+     * One can cancel a coroutine by asking its job to be canceled.
+     * It works the same way for async and launch created jobs, with the exception that awaiting on a cancelled
+     * job throws an Exception.
+     */
+    @Test
+    fun `Cancelling is supported on coroutines`() = runBlocking {
+        // Arrange
+        val expected = 42
+
+        /**
+         * A job that returns something.
+         */
+        val deferred = async {
+            delay(50000)    // Simulating a very long operation
+            45
+        }
+
+        var result = expected
+
+        /**
+         * Another job that mutates something.
+         */
+        val jobyJob = launch {
+            delay(50000)
+            result = 45
+        }
+
+        // Act
+        delay(500)  // Wait for a while, just in case
+        deferred.cancel()   // Manually cancelling the coroutine!
+        jobyJob.cancelAndJoin() // Cancels and awaits the job
+//      Errors out - because the job is already cancelled!
+//      result = deferred.await()
+
+        // Assert
+        assertEquals(
+            expected, result
+        )  // Since we canceled the jobs - the result should never have mutated away from expected
+        // And the jobs themselves should be cancelled.
+        assertTrue(deferred.isCancelled)
+        assertTrue(jobyJob.isCancelled)
+    }
+
+    /**
+     * In order to gracefully support cancellation while doing a computation routine one must code its coroutine
+     * in a way to check its active state. Whenever isActive returns false any computation should stop.
+     */
+    @Test
+    fun `Coroutine cancellation while computing requires cooperation - aka you gotta code that in`() = runBlocking {
+        // Arrange
+        val expected = 42.0
+        var result = expected / 4
+
+        // a job that will be cancelled
+        val keepMultiplying = launch {
+            // by looking at "isActive" we can check if the coroutine is cancelled or not
+            while (isActive) {
+                delay(100)
+                result *= 2
+            }
+        }
+
+        // Act
+        delay(225) // Waiting for a while to give the job some time to run
+        keepMultiplying.cancelAndJoin() // Finally - cancel the job. This should halt the multiplication
+
+        // Assert
+        assertEquals(
+            expected,
+            result
+        )  // Since we only allowed the job to compute twice - we should be back to the expected value
     }
 
 }
