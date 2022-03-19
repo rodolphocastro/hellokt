@@ -5,20 +5,16 @@
 @file:Suppress("ClassName")
 @file:OptIn(ExperimentalTime::class)
 
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
+import kotlinx.coroutines.*
+import kotlin.math.exp
+import kotlin.test.*
 import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
 
 class `Asynchronous programming in Kotlin` {
     @Test
     fun `A coroutine is similar to a thread - it takes some code and runs attempts to run it in parallel`(): Unit {
-        // Tells we're running a blocking operation on this chunk
+        // Tells we're running a blocking operation on this chunk,
         // and it should wait for all coroutines within to complete
         // before unblocking
         runBlocking {
@@ -69,4 +65,48 @@ class `Asynchronous programming in Kotlin` {
         // Assert
         assertEquals(expected, result)
     }
+
+    /**
+     * Similar to C#'s "Task" we can spin off Jobs from within a CoroutineScope by using the launch{} block.
+     * One can then "join" the job to await its completion.
+     */
+    @Test
+    fun `One can spin-off new coroutines (and track their progress) by using the launch function when no return is expected`() = runBlocking {
+        // Arrange
+        var result = 1
+        val expected = 2
+
+        // Act
+        val incrementByOne = launch {
+            delay(1000)
+            result++
+        }
+
+        // Assert
+        assertNotEquals(expected, result)
+        assertFalse(incrementByOne.isCompleted)
+        incrementByOne.join()
+        assertEquals(expected, result)
+        assertTrue(incrementByOne.isCompleted)
+    }
+
+    /**
+     * Similar to C#'s "Task" we can spin off Jobs from within a CoroutineScope by using the async{} block.
+     * One can then get the job's result by awaiting it.
+     */
+    @Test
+    fun `One can spin off new coroutines by using the async function when a return is expected`() = runBlocking {
+        // Arrange
+        val expected = 42
+        val deferredRoutine = async {
+            expected
+        }
+
+        // Act
+        val result = deferredRoutine.await()
+
+        // Assert
+        assertEquals(expected, result)
+    }
+
 }
