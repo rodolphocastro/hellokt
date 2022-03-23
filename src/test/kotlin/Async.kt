@@ -5,6 +5,9 @@
 @file:Suppress("ClassName") @file:OptIn(ExperimentalTime::class)
 
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.consumeEach
+import kotlinx.coroutines.channels.produce
 import kotlin.test.*
 import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
@@ -180,9 +183,71 @@ class `Asynchronous programming in Kotlin` {
 
         // Assert
         assertEquals(
-            expected,
-            result
+            expected, result
         )  // Since we only allowed the job to compute twice - we should be back to the expected value
     }
 
+    /**
+     * In order to share information between different coroutines one can utilize a "Channel<T>".
+     */
+    @Test
+    fun `Channels are ways different Scopes can communicate and process data`() = runBlocking {
+        // Arrange
+        val expected = 42.0
+        val times = 4
+        val increment = expected / times
+        val aChannel = Channel<Double>()
+        var result = 0.0
+
+        // Act
+        // Launching a coroutine that sends information into the channel
+        launch {
+            for (i in 1..times) {
+                aChannel.send(increment)    // Sending information into the channel
+                delay(50)
+            }
+            aChannel.close()    // Tell consumers that we're done with this channel
+        }
+
+        // Iterating the channel while it's not closed
+        for (piece in aChannel) {
+            result += piece
+        }
+
+        // Assert
+        assertEquals(expected, result)
+    }
+
+    /**
+     * For Producer-Consumer (or Observer-Observable) scenarios we can leverage the official "produce" and
+     * "consumeEach" functions to allow us to cut down on boilerplate.
+     */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun `The produce and consumeEach extension methods can be used to handle Producer and Consumer scenarios`(): Unit =
+        runBlocking {
+            // Arrange
+            val expected = 42.0
+            val times = 5
+            val increment = expected / times
+            var result = 0.0
+
+            // Act
+            // Using the produce function we can create a Couroutine and a Channel in a single go
+            val act = produce {
+                for (i in 1..times) {
+                    send(increment)
+                    delay(50)
+                }
+                // Notice how we don't need to *close* the channel!
+            }
+            // and by using "consumeEach" function we can react to whatever comes out from that channel!
+            act.consumeEach { result += it }
+
+            // Assert
+            assertEquals(expected, result)
+        }
+
+    // next: Pipelines
+    // https://kotlinlang.org/docs/channels.html#pipelines
 }
