@@ -6,6 +6,7 @@
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.channels.produce
 import kotlin.test.*
@@ -248,6 +249,42 @@ class `Asynchronous programming in Kotlin` {
             assertEquals(expected, result)
         }
 
-    // next: Pipelines
-    // https://kotlinlang.org/docs/channels.html#pipelines
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun `A pipeline is a pattern where one coroutine produces and another routines consumes while filtering`() =
+        runBlocking {
+            // Arrange
+            val base = (1..10).toList().toIntArray()    // Creating an array from 1 to 10
+            val result = mutableListOf<Int>()
+            val expected = base.filter { it % 2 == 0 }.toIntArray()  // Expected pairs
+
+            /**
+             * A producer that sends all numbers from 1 to 10.
+             */
+            val `produces ints from 1 to 10` = produce {
+                for (i in base) {
+                    send(i)
+                    delay(10)
+                }
+            }
+
+            /**
+             * Extension function that filters something from a receiving channel and produces it back
+             */
+            fun CoroutineScope.filterPairs(channel: ReceiveChannel<Int>) = produce() {
+                for (number in channel) if (number % 2 == 0) send(number)
+            }
+
+            // Act
+            /**
+             * Actually filtering what's coming from the channel and adding into the result set.
+             */
+            filterPairs(`produces ints from 1 to 10`).consumeEach { result.add(it) }
+
+            // Assert
+            assertContentEquals(expected, result.toIntArray())
+        }
+
+    // up-next: Fan-in and Fan-out
+    // https://kotlinlang.org/docs/channels.html#fan-out
 }
