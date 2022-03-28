@@ -2,13 +2,14 @@
     helloKt - A simple sandbox for playing around with Kotlin features
     Copyright (C) 2022  Rodolpho Alves
  */
-@file:Suppress("ClassName") @file:OptIn(ExperimentalTime::class)
+@file:Suppress("ClassName") @file:OptIn(ExperimentalTime::class, ExperimentalCoroutinesApi::class)
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.channels.produce
+import kotlin.math.exp
 import kotlin.test.*
 import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
@@ -223,7 +224,6 @@ class `Asynchronous programming in Kotlin` {
      * For Producer-Consumer (or Observer-Observable) scenarios we can leverage the official "produce" and
      * "consumeEach" functions to allow us to cut down on boilerplate.
      */
-    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun `The produce and consumeEach extension methods can be used to handle Producer and Consumer scenarios`(): Unit =
         runBlocking {
@@ -249,7 +249,6 @@ class `Asynchronous programming in Kotlin` {
             assertEquals(expected, result)
         }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun `A pipeline is a pattern where one coroutine produces and another routines consumes while filtering`() =
         runBlocking {
@@ -285,6 +284,90 @@ class `Asynchronous programming in Kotlin` {
             assertContentEquals(expected, result.toIntArray())
         }
 
-    // up-next: Fan-in and Fan-out
-    // https://kotlinlang.org/docs/channels.html#fan-out
+    /**
+     * When using Channels coroutine automatically split up consumption so we duplications don't occur.
+     */
+    @Test
+    fun `Multiple coroutines can read from the same channel`() = runBlocking {
+        // Arrange
+        val expected = (1..10).toList()
+        val consumers = mutableSetOf<Int>()
+        val result = mutableListOf<Int>()
+        val producesExpected = produce {
+            for (i in expected) {
+                send(i)
+                delay(1)
+            }
+        }
+
+        // Act
+        /**
+         * Creating 5 jobs that run in parallel to consume from the channel
+         */
+        repeat(5) { jobNum ->
+            launch {
+                consumers.add(jobNum)
+                producesExpected.consumeEach {
+                    println("Scope $jobNum consumed $it")
+                    result.add(it)
+                    val delayTime = jobNum + it
+                    delay(delayTime.toLong())
+                }
+            }
+        }
+
+        delay(100)  // Ensuring we give some time for both jobs to run
+
+        // Assert
+        assertContentEquals(expected.sortedDescending(), result.sortedDescending())
+        assertTrue { consumers.count() == 5 }
+    }
+
+    /**
+     * Multiple coroutines can also output into the same channel - allowing other to consume from a single place.
+     */
+    @Test
+    fun `Multiple coroutines can send that into the same channel`() = runBlocking {
+        // Arrange
+        val expected = (1..20).toList()
+        val theIntegerChannel = Channel<Int>()
+        val result = mutableListOf<Int>()
+
+        // Act
+        /**
+         * Creating two producers - one that will send down evens and one that will send down odds.
+         * Once both finish running we should see all numbers (from the expected list) being sent, regardless of their
+         * output order.
+         */
+        repeat(2) { repeatNum ->
+            val consumer = repeatNum + 1
+            launch {
+                if (consumer == 1) {
+                    expected.filter { it % 2 == 0 }.forEach {
+                        println("$consumer sending down $it")
+                        theIntegerChannel.send(it)
+                    }
+                } else {
+                    expected.filter { it % 2 != 0 }.forEach {
+                        println("$consumer sending down $it")
+                        theIntegerChannel.send(it)
+                    }
+                }
+            }
+        }
+
+        // Giving some time for the producers to run
+        delay(100)
+        repeat(20) {
+            val receivedInt = theIntegerChannel.receive()
+            result.add(receivedInt)
+        }
+        coroutineContext.cancelChildren()
+
+        // Assert
+        assertContentEquals(expected.sortedDescending(), result.sortedDescending())
+    }
+
+    // Next-up: Buffered Channels
+    // https://kotlinlang.org/docs/channels.html#buffered-channels
 }
