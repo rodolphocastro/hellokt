@@ -368,6 +368,43 @@ class `Asynchronous programming in Kotlin` {
         assertContentEquals(expected.sortedDescending(), result.sortedDescending())
     }
 
-    // Next-up: Buffered Channels
-    // https://kotlinlang.org/docs/channels.html#buffered-channels
+    @Test
+    fun `Buffered channels allow us to throttle the rate at which events are sent`() = runBlocking {
+        // Arrange
+        /**
+         * A channel with a buffer size of 2 items
+         */
+        val channel = Channel<Int>(3)
+        val expected = listOf<Int>(1, 2, 3)
+        val result = mutableListOf<Int>()
+
+        // Act
+        /**
+         * Attempting to send 10 ints into that channel
+         */
+        val act = launch {
+            try {
+                repeat(10) {
+                    channel.send(it + 1)
+                }
+            } finally {
+                // Upon cancellation, close the channel
+                channel.close()
+            }
+        }
+
+        // Wait for a while, then cancel
+        delay(250)
+        act.cancel()
+        /**
+         * Reacting to channel changes.
+         */
+        channel.consumeEach { result.add(it) }
+
+        // Assert
+        assertContentEquals(expected, result)
+    }
+
+    // up-next: Tickers
+    // https://kotlinlang.org/docs/channels.html#ticker-channels
 }
