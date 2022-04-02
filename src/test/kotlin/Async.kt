@@ -5,11 +5,7 @@
 @file:Suppress("ClassName") @file:OptIn(ExperimentalTime::class, ExperimentalCoroutinesApi::class)
 
 import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.ReceiveChannel
-import kotlinx.coroutines.channels.consumeEach
-import kotlinx.coroutines.channels.produce
-import kotlin.math.exp
+import kotlinx.coroutines.channels.*
 import kotlin.test.*
 import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
@@ -405,6 +401,5 @@ class `Asynchronous programming in Kotlin` {
         assertContentEquals(expected, result)
     }
 
-    // up-next: Tickers
-    // https://kotlinlang.org/docs/channels.html#ticker-channels
+    // Not capturing tickers because they are flagged as obsolete
 }
