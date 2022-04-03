@@ -11,9 +11,25 @@ import java.util.*
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
+import kotlin.test.assertTrue
 import kotlin.time.ExperimentalTime
 
-data class Enemy(val name: String)
+/**
+ * A fake enemy for testing purposes.
+ */
+data class Enemy(val name: String) {
+    companion object {
+
+        /**
+         * Generates a set amount of Enemies.
+         */
+        fun GenerateEnemies(quantity: Int): Flow<Enemy> = flow {
+            repeat(quantity) {
+                emit(createEnemy())
+            }
+        }
+    }
+}
 
 /**
  * Creates a random enemy.
@@ -116,6 +132,86 @@ class `Asynchronous Enumerations in Kotlin` {
         assertContentEquals(expected, gotFlow)
     }
 
-    // up-next: https://kotlinlang.org/docs/flow.html#intermediate-flow-operators
-    // Flow Operators
+    /**
+     * Basic operators such as map and filter allow us to mutate a flow's output without blocking it.
+     */
+    @Test
+    fun `Intermediate operators allow us to mutate outputs from Flows without blocking`() = runBlocking {
+        // Arrange
+        val numberOfEnemies = 5
+        val aName = "An Enemy"
+        val expected = Enemy.GenerateEnemies(numberOfEnemies).toList()
+        val expectedMapped = expected.map { it.copy(name = aName) }
+        val expectedFiltered = expected.filter { it.name.contains("6", true) }
+        val baseFlow = expected.asFlow()
+
+        // Act
+        val gotMap = mutableListOf<Enemy>()
+        val gotFiltered = mutableListOf<Enemy>()
+        baseFlow.map { it.copy(name = aName) }
+            .collect { gotMap.add(it) } // Mapping out the flow's outputs into a new flow, then collecting
+        baseFlow.filter { it.name.contains("6", true) }
+            .collect { gotFiltered.add(it) } // Filtering out the flow's outputs into a new flow, then collecting
+
+        // Assert
+        assertContentEquals(expectedMapped, gotMap)
+        assertContentEquals(expectedFiltered, gotFiltered)
+    }
+
+    /**
+     * The transform operator allows us to do more complex routines
+     */
+    @Test
+    fun `The transform operator allow us to expand upon the basic intermediate operators by leveraging emit`() =
+        runBlocking {
+            // Arrange
+            val numberOfEnemies = 5
+            val expected = Enemy.GenerateEnemies(numberOfEnemies).toList()
+            val baseFlow = expected.asFlow()
+
+            // Act
+            val got = mutableListOf<Enemy>()
+            /**
+             * By using Transform we can mutate, emit different things or even do some logging.
+             */
+            baseFlow.transform {
+                emit(it)
+                println("double emitting ${it.name} as a Double")
+                emit(it.copy(name = "Double"))
+            }.collect() {
+                got.add(it)
+            }
+
+            // Assert
+            assertEquals(numberOfEnemies * 2, got.count())
+        }
+
+    @Test
+    fun `The take operator allows us to limit what is received from a flow - then cancel its execution`() =
+        runBlocking {
+            // Arrange
+            val enemy = Enemy("Grafted Scion")
+            var cancelled = false
+            val subject = flow {
+                try {
+                    while (true) {
+                        emit(enemy)
+                        delay(1000000)  // Wait for a very long time if someone wants more enemies
+                    }
+                } finally {
+                    cancelled = true
+                }
+            }
+
+            // Act
+            val got = mutableListOf<Enemy>()
+            subject.take(1).collect() { got.add(it) }
+
+            // Assert
+            assertTrue { cancelled }
+            assertEquals(enemy, got.firstOrNull())
+        }
+
+    // up-next: https://kotlinlang.org/docs/flow.html#terminal-flow-operators
+    // Terminal Operators
 }
