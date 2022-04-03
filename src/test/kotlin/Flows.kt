@@ -5,8 +5,7 @@
 @file:Suppress("ClassName") @file:OptIn(ExperimentalTime::class, ExperimentalCoroutinesApi::class)
 
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.*
 import org.junit.Test
 import java.util.*
 import kotlin.test.assertContentEquals
@@ -48,7 +47,7 @@ class `Asynchronous Enumerations in Kotlin` {
         val got = mutableListOf<Enemy>()
         val timeBetweenEnemies: Long = 50
         val continuouslyCreateEnemies = flow {
-            while (isActive) {
+            while (true) {
                 emit(createEnemy()) // now return something
                 delay(timeBetweenEnemies)   // wait a bit, be lazy!
             }
@@ -92,5 +91,31 @@ class `Asynchronous Enumerations in Kotlin` {
         )
     }
 
-    // up-next: https://kotlinlang.org/docs/flow.html#flow-builders
+    @Test
+    fun `There are different type of builders we can use to create flows`() = runBlocking {
+        // Arrange
+        val expectedRange = 1..50 step 3
+        val expectedAsArray = expectedRange.toList().toTypedArray()
+        val expected = expectedRange.toList()
+
+        // Act
+        val asFlow = expected.asFlow()  // Creating a flow from an existing collection
+        val flowOf = flowOf(*expectedAsArray) // Creating a flow to emit a fixed set of values
+        // note: that * is not a pointer - it's a spread operator
+        val flow = flow {
+            for (i in expectedRange) emit(i)
+        }   // Usual way to create a flow
+
+        val gotAsFlow = asFlow.toList()
+        val gotFlowOf = flowOf.toList()
+        val gotFlow = flow.toList()
+
+        // Assert
+        assertContentEquals(expected, gotAsFlow)
+        assertContentEquals(expected, gotFlowOf)
+        assertContentEquals(expected, gotFlow)
+    }
+
+    // up-next: https://kotlinlang.org/docs/flow.html#intermediate-flow-operators
+    // Flow Operators
 }
