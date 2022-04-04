@@ -23,7 +23,7 @@ data class Enemy(val name: String) {
         /**
          * Generates a set amount of Enemies.
          */
-        fun GenerateEnemies(quantity: Int): Flow<Enemy> = flow {
+        fun generateEnemies(quantity: Int): Flow<Enemy> = flow {
             repeat(quantity) {
                 emit(createEnemy())
             }
@@ -140,7 +140,7 @@ class `Asynchronous Enumerations in Kotlin` {
         // Arrange
         val numberOfEnemies = 5
         val aName = "An Enemy"
-        val expected = Enemy.GenerateEnemies(numberOfEnemies).toList()
+        val expected = Enemy.generateEnemies(numberOfEnemies).toList()
         val expectedMapped = expected.map { it.copy(name = aName) }
         val expectedFiltered = expected.filter { it.name.contains("6", true) }
         val baseFlow = expected.asFlow()
@@ -166,7 +166,7 @@ class `Asynchronous Enumerations in Kotlin` {
         runBlocking {
             // Arrange
             val numberOfEnemies = 5
-            val expected = Enemy.GenerateEnemies(numberOfEnemies).toList()
+            val expected = Enemy.generateEnemies(numberOfEnemies).toList()
             val baseFlow = expected.asFlow()
 
             // Act
@@ -212,6 +212,12 @@ class `Asynchronous Enumerations in Kotlin` {
             assertEquals(enemy, got.firstOrNull())
         }
 
-    // up-next: https://kotlinlang.org/docs/flow.html#terminal-flow-operators
-    // Terminal Operators
+    @Test
+    fun `Terminal operators are suspending functions that start the collection of a flow`(): Unit = runBlocking {
+        // Arrange
+
+        // Act
+
+        // Assert
+    }
 }
