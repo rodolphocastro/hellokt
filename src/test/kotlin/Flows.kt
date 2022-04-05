@@ -215,9 +215,22 @@ class `Asynchronous Enumerations in Kotlin` {
     @Test
     fun `Terminal operators are suspending functions that start the collection of a flow`(): Unit = runBlocking {
         // Arrange
+        val enemyFlow = Enemy.generateEnemies(10)
 
         // Act
+        val reducedFlow = enemyFlow.reduce { e1, e2 -> Enemy("$e1.name-$e2.name}") }
+        val foldedFlow = enemyFlow.fold(Enemy("an enemy")) { acc, value -> Enemy("$acc.name-${value.name}") }
+        val toListFlow = enemyFlow.toList()
+        val toSetFlow = enemyFlow.toSet()
+        val firstFlow = enemyFlow.first()
+//        val singleFlow = enemyFlow.single()   // Throws because this flow has more than one element
 
         // Assert
+        assertEquals(toListFlow.count(), toSetFlow.count())
+        assertNotEquals(firstFlow, reducedFlow)
+        assertNotEquals(foldedFlow, reducedFlow)
     }
+
+    // up-next: https://kotlinlang.org/docs/flow.html#buffering
+    // Buffering
 }
